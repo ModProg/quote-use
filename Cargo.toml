@@ -1,0 +1,22 @@
+[package]
+categories = ["rust-patterns", "development-tools::procedural-macro-helpers", "parsing"]
+description = "Support `use` in procmacros hygienically"
+documentation = "https://docs.rs/quote-use"
+include = ["src/**/*", "Cargo.toml", "LICENSE", "README.md"]
+keywords = ["macro"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/ModProg/quote-use"
+version = "0.1.0"
+edition = "2021"
+name = "quote-use"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+derive-where = "1.0.0-rc.3"
+proc-macro-error = "1.0.4"
+proc-macro2 = "1.0.36"
+quote = "1.0.17"
+syn = { version = "1.0.90", features = ["full"] }
