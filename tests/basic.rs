@@ -48,3 +48,19 @@ fn ident_in_path() {
     };
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
+
+#[test]
+fn module() {
+    let quoted = quote::quote! {
+        ::smth::ho::Name(10);
+        other::Name(10)
+    };
+
+    let quote_used = quote_use! {
+        use ::smth::ho;
+
+        ho::Name(10);
+        other::Name(10)
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
