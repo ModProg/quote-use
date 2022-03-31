@@ -1,103 +1,80 @@
-//! The first version of the core prelude.
-//!
-//! See the [module-level documentation](super) for more.
+use proc_macro2::Ident;
+use syn::{parse_quote, parse_str, File, Item, ItemUse, UsePath, UseTree};
 
-#![stable(feature = "core_prelude", since = "1.4.0")]
+use crate::Use;
 
-// Re-exported core operators
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::marker::{Copy, Send, Sized, Sync, Unpin};
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::ops::{Drop, Fn, FnMut, FnOnce};
+#[cfg(all(
+    feature = "prelude_2021",
+    not(any(feature = "prelude_std", feature = "prelude_core"))
+))]
+compile_error!("prelude_2021 only works when either prelude_std or prelude_core are enabled");
 
-// Re-exported functions
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::mem::drop;
+#[cfg(all(feature = "prelude_std", feature = "prelude_core"))]
+compile_error!("prelude_core and prelude_std are mutually exclusive");
 
-// Re-exported types and traits
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::clone::Clone;
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::cmp::{Eq, Ord, PartialEq, PartialOrd};
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::convert::{AsMut, AsRef, From, Into};
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::default::Default;
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::iter::{DoubleEndedIterator, ExactSizeIterator};
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::iter::{Extend, IntoIterator, Iterator};
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::option::Option::{self, None, Some};
-#[stable(feature = "core_prelude", since = "1.4.0")]
-#[doc(no_inline)]
-pub use crate::result::Result::{self, Err, Ok};
+#[cfg(feature = "prelude_std")]
+pub(crate) fn prelude() -> impl Iterator<Item = Use> {
+    let prelude = parse_prelude(include_str!("prelude/std.rs"), parse_quote!(std));
+    #[cfg(feature = "prelude_2021")]
+    return prelude.chain(parse_prelude(
+        include_str!("prelude/2021.rs"),
+        parse_quote!(std),
+    ));
+    #[cfg(not(feature = "prelude_2021"))]
+    prelude
+}
 
-// Re-exported built-in macros
-#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-#[doc(no_inline)]
-pub use crate::fmt::macros::Debug;
-#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-#[doc(no_inline)]
-pub use crate::hash::macros::Hash;
+#[cfg(feature = "prelude_core")]
+pub(crate) fn prelude() -> impl Iterator<Item = Use> {
+    let prelude = parse_prelude(include_str!("prelude/core.rs"), parse_quote!(core));
+    #[cfg(feature = "prelude_2021")]
+    return prelude.chain(parse_prelude(
+        include_str!("prelude/2021.rs"),
+        parse_quote!(core),
+    ));
+    #[cfg(not(feature = "prelude_2021"))]
+    prelude
+}
 
-#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-#[allow(deprecated)]
-#[doc(no_inline)]
-pub use crate::{
-    assert, cfg, column, compile_error, concat, concat_idents, env, file, format_args,
-    format_args_nl, include, include_bytes, include_str, line, llvm_asm, log_syntax, module_path,
-    option_env, stringify, trace_macros,
-};
+#[cfg(not(any(feature = "prelude_core", feature = "prelude_std")))]
+pub(crate) fn prelude() -> impl Iterator<Item = Use> {
+    Vec::new().into_iter()
+}
 
-#[unstable(
-    feature = "concat_bytes",
-    issue = "87555",
-    reason = "`concat_bytes` is not stable enough for use and is subject to change"
-)]
-#[cfg(not(bootstrap))]
-#[doc(no_inline)]
-pub use crate::concat_bytes;
+fn parse_prelude(file: &str, crate_: Ident) -> impl Iterator<Item = Use> {
+    let statements: File = parse_str(file).unwrap();
 
-// Do not `doc(inline)` these `doc(hidden)` items.
-#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-#[allow(deprecated)]
-pub use crate::macros::builtin::{RustcDecodable, RustcEncodable};
-
-// Do not `doc(no_inline)` so that they become doc items on their own
-// (no public module for them to be re-exported from).
-#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
-pub use crate::macros::builtin::{bench, derive, global_allocator, test, test_case};
-
-#[unstable(
-    feature = "cfg_accessible",
-    issue = "64797",
-    reason = "`cfg_accessible` is not fully implemented"
-)]
-pub use crate::macros::builtin::cfg_accessible;
-
-#[unstable(
-    feature = "cfg_eval",
-    issue = "82679",
-    reason = "`cfg_eval` is a recently implemented feature"
-)]
-pub use crate::macros::builtin::cfg_eval;
-
-
-#[stable(feature = "prelude_2021", since = "1.55.0")]
-#[doc(no_inline)]
-pub use crate::iter::FromIterator;
-
-#[stable(feature = "prelude_2021", since = "1.55.0")]
-#[doc(no_inline)]
-pub use crate::convert::{TryFrom, TryInto};
+    statements
+        .items
+        .into_iter()
+        .flat_map(move |expr| match expr {
+            Item::Use(item_use) => Use::from_item_use(match item_use {
+                ItemUse {
+                    attrs,
+                    vis,
+                    use_token,
+                    leading_colon,
+                    tree:
+                        UseTree::Path(UsePath {
+                            ident,
+                            colon2_token,
+                            tree,
+                        }),
+                    semi_token,
+                } if ident == "crate" => ItemUse {
+                    attrs,
+                    vis,
+                    use_token,
+                    leading_colon,
+                    tree: UseTree::Path(UsePath {
+                        ident: crate_.clone(),
+                        colon2_token,
+                        tree,
+                    }),
+                    semi_token,
+                },
+                any => any,
+            }),
+            _ => Vec::new(),
+        })
+}

@@ -1,11 +1,11 @@
-use proc_macro2::{Ident, Punct, Spacing, TokenStream};
+use proc_macro2::{Ident, Spacing, TokenStream};
 use proc_macro_error::{abort, proc_macro_error};
 use quote::{quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
-    parse_macro_input, parse_quote, parse_str, File, Item, ItemUse, Path, Token, UseGroup, UseName,
-    UsePath, UseTree,
+    parse_macro_input, parse_quote, ItemUse, Path, Token, UseGroup, UseName, UsePath, UseTree,
 };
+mod prelude;
 
 #[proc_macro_error]
 #[proc_macro]
@@ -35,7 +35,7 @@ impl Parse for Uses {
 impl ToTokens for Uses {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Self(uses, tail) = self;
-        let mut prelude = prelude();
+        let mut prelude: Vec<_> = prelude::prelude().collect();
         prelude.extend_from_slice(uses);
         let uses = &prelude;
 
@@ -71,7 +71,7 @@ struct UseNode {
 }
 
 impl Use {
-    fn from_item_use(input: ItemUse) -> syn::Result<Vec<Self>> {
+    fn from_item_use(input: ItemUse) -> Vec<Self> {
         let mut output = Vec::new();
 
         let mut nodes = vec![UseNode {
@@ -116,7 +116,6 @@ impl Use {
                 }
                 UseTree::Group(UseGroup { items, .. }) => {
                     for item in items {
-                        // println!("{}:{}", path.to_token_stream(), item.to_token_stream());
                         nodes.push(UseNode {
                             path: path.clone(),
                             trailing_colon2,
@@ -129,24 +128,10 @@ impl Use {
                 UseTree::Glob(_) => abort!(tree, "Globs are not supported"),
             }
         }
-        Ok(output)
+        output
     }
 
     fn parse(input: ParseStream) -> syn::Result<Vec<Self>> {
-        Self::from_item_use(input.parse()?)
+        Ok(Self::from_item_use(input.parse()?))
     }
-}
-
-fn prelude() -> Vec<Use> {
-    let statements: File =
-        parse_str(&include_str!("prelude.rs").replace("crate::", "core::")).unwrap();
-
-    statements
-        .items
-        .into_iter()
-        .flat_map(|expr| match expr {
-            Item::Use(item_use) => Use::from_item_use(item_use).unwrap(),
-            _ => Vec::new(),
-        })
-        .collect()
 }

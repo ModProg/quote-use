@@ -19,3 +19,10 @@ proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.36"
 quote = "1.0.17"
 syn = { version = "1.0.90", features = ["full"] }
+
+[features]
+default = ["prelude_core", "prelude_2021"]
+prelude_core = []
+prelude_std = []
+prelude_2021 = []
+

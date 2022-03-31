@@ -1,6 +1,5 @@
 use quote::quote;
 use quote_use::quote_use;
-use std::result::{Result, self};
 
 #[test]
 fn r#use() {
@@ -23,6 +22,7 @@ fn r#use() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
+#[cfg(feature="prelude_core")]
 #[test]
 fn prelude() {
     let quoted = quote! {
@@ -31,6 +31,45 @@ fn prelude() {
 
     let quote_used = quote_use! {
         Some(10)
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
+#[cfg(all(feature="prelude_2021", feature="prelude_core"))]
+#[test]
+fn prelude_2021() {
+    let quoted = quote! {
+        ::core::iter::FromIterator
+    };
+
+    let quote_used = quote_use! {
+        FromIterator
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
+#[cfg(feature="prelude_std")]
+#[test]
+fn prelude() {
+    let quoted = quote! {
+        ::std::string::String::new("hello")
+    };
+
+    let quote_used = quote_use! {
+        String::new("hello")
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
+#[cfg(all(feature="prelude_2021", feature="prelude_std"))]
+#[test]
+fn prelude_2021() {
+    let quoted = quote! {
+        ::std::iter::FromIterator
+    };
+
+    let quote_used = quote_use! {
+        FromIterator
     };
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
