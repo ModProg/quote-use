@@ -32,3 +32,19 @@ fn prelude() {
     };
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
+
+#[test]
+fn ident_in_path() {
+    let quoted = quote::quote! {
+        ::smth::ho::Name(10);
+        other::Name(10)
+    };
+
+    let quote_used = quote_use! {
+        use ::smth::ho::Name;
+
+        Name(10);
+        other::Name(10)
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}

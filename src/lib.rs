@@ -1,5 +1,4 @@
-use derive_where::derive_where;
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::{Ident, Punct, Spacing, TokenStream};
 use proc_macro_error::{abort, proc_macro_error};
 use quote::{quote, ToTokens};
 use syn::{
@@ -40,11 +39,21 @@ impl ToTokens for Uses {
         prelude.extend_from_slice(uses);
         let uses = &prelude;
 
+        let mut in_path = false;
         tokens.extend(tail.clone().into_iter().flat_map(|token| {
-            if let proc_macro2::TokenTree::Ident(ident) = &token {
-                if let Some(Use(path, _)) = uses.iter().find(|item| &item.1 == ident) {
-                    return quote!(#path);
+            match &token {
+                proc_macro2::TokenTree::Ident(ident) if !in_path => {
+                    if let Some(Use(path, _)) = uses.iter().find(|item| &item.1 == ident) {
+                        return quote!(#path);
+                    }
                 }
+                proc_macro2::TokenTree::Punct(punct)
+                    if punct.spacing() == Spacing::Joint && punct.as_char() == ':' =>
+                {
+                    in_path = true
+                }
+                proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ':' => (),
+                _ => in_path = false,
             };
             quote!(#token)
         }));
@@ -52,8 +61,7 @@ impl ToTokens for Uses {
 }
 
 #[derive(Clone)]
-#[derive_where(Debug)]
-struct Use(#[derive_where(skip)] Path, Ident);
+struct Use(Path, Ident);
 
 impl Use {
     fn from_item_use(input: ItemUse) -> syn::Result<Vec<Self>> {

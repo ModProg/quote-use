@@ -15,7 +15,6 @@ name = "quote-use"
 proc-macro = true
 
 [dependencies]
-derive-where = "1.0.0-rc.3"
 proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.36"
 quote = "1.0.17"
