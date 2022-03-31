@@ -63,33 +63,70 @@ impl ToTokens for Uses {
 #[derive(Clone)]
 struct Use(Path, Ident);
 
+struct UseNode {
+    path: TokenStream,
+    trailing_colon2: Token!(::),
+    last_ident: Option<Ident>,
+    tree: UseTree,
+}
+
 impl Use {
     fn from_item_use(input: ItemUse) -> syn::Result<Vec<Self>> {
         let mut output = Vec::new();
 
-        let mut nodes: Vec<(TokenStream, UseTree)> = vec![(quote!(::), input.tree)];
+        let mut nodes = vec![UseNode {
+            path: quote!(),
+            trailing_colon2: parse_quote!(::),
+            last_ident: None,
+            tree: input.tree,
+        }];
 
-        while let Some((mut path, node)) = nodes.pop() {
-            match node {
+        while let Some(UseNode {
+            mut path,
+            trailing_colon2,
+            last_ident,
+            tree,
+        }) = nodes.pop()
+        {
+            match tree {
                 UseTree::Path(UsePath {
                     ident,
                     colon2_token,
                     tree,
                 }) => {
+                    trailing_colon2.to_tokens(&mut path);
                     ident.to_tokens(&mut path);
-                    colon2_token.to_tokens(&mut path);
-                    nodes.push((path, *tree))
+                    nodes.push(UseNode {
+                        path,
+                        trailing_colon2: colon2_token,
+                        last_ident: Some(ident),
+                        tree: *tree,
+                    })
                 }
                 UseTree::Name(UseName { ident }) => {
-                    output.push(Use(parse_quote!(#path #ident), ident))
+                    if ident == "self" {
+                        if let Some(ident) = last_ident {
+                            output.push(Use(parse_quote!(#path), ident))
+                        } else {
+                            abort!(ident, "self at root level is not supported")
+                        }
+                    } else {
+                        output.push(Use(parse_quote!(#path #trailing_colon2 #ident), ident))
+                    }
                 }
                 UseTree::Group(UseGroup { items, .. }) => {
                     for item in items {
-                        nodes.push((path.clone(), item))
+                        // println!("{}:{}", path.to_token_stream(), item.to_token_stream());
+                        nodes.push(UseNode {
+                            path: path.clone(),
+                            trailing_colon2,
+                            last_ident: last_ident.clone(),
+                            tree: item,
+                        })
                     }
                 }
-                UseTree::Rename(_) => abort!(node, "Renaming is not supported"),
-                UseTree::Glob(_) => abort!(node, "Globs are not supported"),
+                UseTree::Rename(_) => abort!(tree, "Renaming is not supported"),
+                UseTree::Glob(_) => abort!(tree, "Globs are not supported"),
             }
         }
         Ok(output)
