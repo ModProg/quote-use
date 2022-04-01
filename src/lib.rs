@@ -53,7 +53,7 @@
 //! ```
 //! ### Different preludes
 //!
-//! By default [`quote_use!`] uses the [std prelude](std::prelude) for [2021 edition](std::prelude::rust_2021), 
+//! By default [`quote_use!`] uses the [std prelude](std::prelude) for [2021 edition](std::prelude::rust_2021),
 //! but this can be configured via features, and also completely disabled.
 //!
 //! - **`prelude_std`**: Enables [`std::prelude::v1`]  (incompatible with `prelude_core`)
@@ -68,8 +68,7 @@ use syn::{
 };
 mod prelude;
 
-
-/// [`quote!`] replacement that allows [using](https://doc.rust-lang.org/std/keyword.use.html) paths to be 
+/// [`quote!`] replacement that allows [using](https://doc.rust-lang.org/std/keyword.use.html) paths to be
 /// automaticly replaced.
 ///
 /// It supports both the explicit use via `use some::path::Type;` and the use of the rust prelude:
@@ -115,8 +114,15 @@ impl ToTokens for Uses {
         let mut uses = uses.to_vec();
         uses.extend(prelude::prelude());
 
-        let mut in_path = false;
-        tokens.extend(tail.clone().into_iter().flat_map(|token| {
+        tokens.extend(replace_in_group(&uses, tail.clone()));
+    }
+}
+
+fn replace_in_group(uses: &[Use], tokens: TokenStream) -> TokenStream {
+    let mut in_path = false;
+    tokens
+        .into_iter()
+        .flat_map(|token| {
             match &token {
                 proc_macro2::TokenTree::Ident(ident) if !in_path => {
                     if let Some(Use(path, _)) = uses.iter().find(|item| &item.1 == ident) {
@@ -129,11 +135,20 @@ impl ToTokens for Uses {
                     in_path = true
                 }
                 proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ':' => (),
+                proc_macro2::TokenTree::Group(group) => {
+                    let tokens = replace_in_group(uses, group.stream());
+                    return match group.delimiter() {
+                        proc_macro2::Delimiter::Parenthesis => quote!((#tokens)),
+                        proc_macro2::Delimiter::Brace => quote!({#tokens}),
+                        proc_macro2::Delimiter::Bracket => quote!([#tokens]),
+                        proc_macro2::Delimiter::None => tokens,
+                    };
+                }
                 _ => in_path = false,
             };
             quote!(#token)
-        }));
-    }
+        })
+        .collect()
 }
 
 #[derive(Clone)]

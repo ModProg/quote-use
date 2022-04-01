@@ -22,7 +22,7 @@ fn r#use() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(feature="prelude_core")]
+#[cfg(feature = "prelude_core")]
 #[test]
 fn prelude() {
     let quoted = quote! {
@@ -35,7 +35,7 @@ fn prelude() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(all(feature="prelude_2021", feature="prelude_core"))]
+#[cfg(all(feature = "prelude_2021", feature = "prelude_core"))]
 #[test]
 fn prelude_2021() {
     let quoted = quote! {
@@ -48,7 +48,7 @@ fn prelude_2021() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(feature="prelude_std")]
+#[cfg(feature = "prelude_std")]
 #[test]
 fn prelude() {
     let quoted = quote! {
@@ -61,7 +61,7 @@ fn prelude() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(all(feature="prelude_2021", feature="prelude_std"))]
+#[cfg(all(feature = "prelude_2021", feature = "prelude_std"))]
 #[test]
 fn prelude_2021() {
     let quoted = quote! {
@@ -74,7 +74,7 @@ fn prelude_2021() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(any(feature="prelude_core", feature="prelude_std"))]
+#[cfg(any(feature = "prelude_core", feature = "prelude_std"))]
 #[test]
 fn prelude_override() {
     let quoted = quote! {
@@ -149,6 +149,24 @@ fn self_in_group() {
         use ::smth::ho::{self, Ident};
 
         ho::Name(10);
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
+#[test]
+fn braces() {
+    let quoted = quote! {
+        {::smth::ho::Name(10)}
+        [::smth::ho::Name(10)]
+        (::smth::ho::Name(10))
+    };
+
+    let quote_used = quote_use! {
+        use ::smth::ho::Name;
+
+        {Name(10)}
+        [Name(10)]
+        (Name(10))
     };
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
