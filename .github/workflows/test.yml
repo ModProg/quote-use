@@ -15,8 +15,8 @@ jobs:
         features:
           - ""
           - --no-default-features
-          - --no-default-features --features prelude_core prelude_2021
-          - --no-default-features --features prelude_core
+          - --features prelude_core prelude_2021 --no-default-features 
+          - --features prelude_core --no-default-features 
 
     runs-on: ubuntu-latest
 
