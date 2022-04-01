@@ -1,0 +1,38 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  build-test:
+    name: Build + Test
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - stable
+          - nightly
+        features:
+          - ""
+          - --no-default-features
+          - --no-default-features --features prelude_core prelude_2021
+          - --no-default-features --features prelude_core
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update Rust
+        run: |
+          rustup toolchain install ${{ matrix.rust }} --profile minimal --allow-downgrade
+          rustup default ${{ matrix.rust }}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build
+        run:
+          cargo build ${{ matrix.features }}
+      - name: Test
+        run:
+          cargo test ${{ matrix.features }} --all-targets --no-fail-fast
+      - name: Doc Test
+        run:
+          cargo test ${{ matrix.features }} --doc --no-fail-fast

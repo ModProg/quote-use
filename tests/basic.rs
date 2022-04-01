@@ -74,6 +74,21 @@ fn prelude_2021() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
+#[cfg(any(feature="prelude_core", feature="prelude_std"))]
+#[test]
+fn prelude_override() {
+    let quoted = quote! {
+        ::anyhow::Result
+    };
+
+    let quote_used = quote_use! {
+        use anyhow::Result;
+
+        Result
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
 #[test]
 fn ident_in_path() {
     let quoted = quote! {

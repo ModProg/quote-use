@@ -1,3 +1,64 @@
+//! # Description
+//!
+//! Macro to simplify using Types in the [`quote!`] macro.
+//!
+//! # Usage
+//!
+//! The [`quote_use!`] macro can be used just like [`quote!`], but with the added functionality of
+//! adding use statements at the top:
+//!
+//! ```
+//! # use quote_use::quote_use;
+//! quote_use!{
+//!     use std::fs::read;
+//!     
+//!     read("src/main.rs")
+//! }
+//! # ;
+//! ```
+//!
+//! This will expand to the equivalent statement using [`quote!`]:
+//!
+//! ```
+//! # use quote::quote;
+//! quote!{
+//!     ::std::fs::read::read("src/main.rs")
+//! }
+//! # ;
+//! ```
+//!
+//! ## Prelude
+//!
+//! This also allows to use contents of the rust prelude directly:
+//!
+//! ```
+//! # use quote_use::quote_use;
+//! quote_use!{
+//!     Some("src/main.rs")
+//! }
+//! # ;
+//! ```
+//! ### Overriding prelude
+//! When you want to use your own type instead of the prelude type this can be achieved by simply
+//! importing it like so
+//!
+//! ```
+//! # use quote_use::quote_use;
+//! quote_use!{
+//!     use anyhow::Result;
+//!
+//!     Result
+//! }
+//! # ;
+//! ```
+//! ### Different preludes
+//!
+//! By default [`quote_use!`] uses the [std prelude](std::prelude) for [2021 edition](std::prelude::rust_2021), 
+//! but this can be configured via features, and also completely disabled.
+//!
+//! - **`prelude_std`**: Enables [`std::prelude::v1`]  (incompatible with `prelude_core`)
+//! - `prelude_core`: Enables [`core::prelude::v1`] (incompatible with `prelude_std`)
+//! - **`prelude_2021`**: Enables [`core::prelude::rust_2021`] (requires either `prelude_std` or `prelude_core`)
 use proc_macro2::{Ident, Spacing, TokenStream};
 use proc_macro_error::{abort, proc_macro_error};
 use quote::{quote, ToTokens};
@@ -7,6 +68,22 @@ use syn::{
 };
 mod prelude;
 
+
+/// [`quote!`] replacement that allows [using](https://doc.rust-lang.org/std/keyword.use.html) paths to be 
+/// automaticly replaced.
+///
+/// It supports both the explicit use via `use some::path::Type;` and the use of the rust prelude:
+/// ```
+/// # use quote_use::quote_use;
+/// quote_use!{
+///     use std::fs::read;
+///     
+///     read("src/main.rs")
+///
+///     Some(20)
+/// }
+/// # ;
+/// ```
 #[proc_macro_error]
 #[proc_macro]
 pub fn quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -35,9 +112,8 @@ impl Parse for Uses {
 impl ToTokens for Uses {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Self(uses, tail) = self;
-        let mut prelude: Vec<_> = prelude::prelude().collect();
-        prelude.extend_from_slice(uses);
-        let uses = &prelude;
+        let mut uses = uses.to_vec();
+        uses.extend(prelude::prelude());
 
         let mut in_path = false;
         tokens.extend(tail.clone().into_iter().flat_map(|token| {
