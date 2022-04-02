@@ -96,6 +96,110 @@ pub fn quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     .into()
 }
 
+/// Like [`quote_use!`] but using [`quote_spanned!`](quote::quote_spanned)
+/// ```
+/// # use quote_use::quote_spanned_use;
+/// # use proc_macro2::Span;
+/// #
+/// # let span = Span::call_site();
+/// quote_spanned_use!{span=>
+///     use std::fs::read;
+///     
+///     read("src/main.rs")
+///
+///     Some(20)
+/// }
+/// # ;
+/// ```
+#[proc_macro_error]
+#[proc_macro]
+pub fn quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let UsesSpanned(spanned, uses) = parse_macro_input!(input as UsesSpanned);
+
+    quote! {
+        ::quote::quote_spanned!{
+            #spanned
+            #uses
+        }
+    }
+    .into()
+}
+
+/// Like [`quote_use!`] but using [`parse_quote!`](syn::parse_quote)
+/// ```
+/// # use quote_use::parse_quote_use;
+/// # use syn::{Expr, parse_quote};
+/// # use quote::ToTokens;
+/// #
+/// let expr: Expr = parse_quote_use!{
+///     use std::fs::read;
+///     
+///     read("src/main.rs")
+/// }
+/// # ;
+/// # let expected: Expr = parse_quote!(::std::fs::read("src/main.rs"));
+/// # assert_eq!{
+/// #   expr.to_token_stream().to_string(),
+/// #   expected.to_token_stream().to_string()
+/// # };
+/// ```
+#[proc_macro_error]
+#[proc_macro]
+pub fn parse_quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let uses = parse_macro_input!(input as Uses);
+
+    quote! {
+        ::syn::parse_quote!{
+            #uses
+        }
+    }
+    .into()
+}
+
+/// Like [`quote_spanned_use!`] but using [`parse_quote_spanned!`](syn::parse_quote_spanned)
+/// ```
+/// # use quote_use::parse_quote_spanned_use;
+/// # use syn::{parse_quote_spanned, Expr, spanned::Spanned};
+/// # use proc_macro2::Span;
+/// # use quote::ToTokens;
+/// #
+/// # let span = Span::call_site();
+/// let expr: Expr = parse_quote_spanned_use!{span=>
+///     use std::fs::read;
+///     
+///     read("src/main.rs")
+/// }
+/// # ;
+/// # let expected: Expr = parse_quote_spanned!(span=> ::std::fs::read("src/main.rs"));
+/// # assert_eq!{
+/// #   expr.to_token_stream().to_string(),
+/// #   expected.to_token_stream().to_string()
+/// # };
+/// ```
+#[proc_macro_error]
+#[proc_macro]
+pub fn parse_quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let UsesSpanned(spanned, uses) = parse_macro_input!(input as UsesSpanned);
+
+    quote! {
+        ::syn::parse_quote_spanned!{
+            #spanned
+            #uses
+        }
+    }
+    .into()
+}
+
+struct UsesSpanned(TokenStream, Uses);
+impl Parse for UsesSpanned {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let ident = Ident::parse(input)?;
+        let arrow = <Token!(=>)>::parse(input)?;
+
+        Ok(Self(quote!(#ident #arrow), Uses::parse(input)?))
+    }
+}
+
 struct Uses(Vec<Use>, TokenStream);
 impl Parse for Uses {
     fn parse(input: ParseStream) -> syn::Result<Self> {
