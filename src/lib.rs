@@ -59,6 +59,15 @@
 //! - **`prelude_std`**: Enables [`std::prelude::v1`]  (incompatible with `prelude_core`)
 //! - `prelude_core`: Enables [`core::prelude::v1`] (incompatible with `prelude_std`)
 //! - **`prelude_2021`**: Enables [`core::prelude::rust_2021`] (requires either `prelude_std` or `prelude_core`)
+//!
+//! ## Other quote macros
+//!
+//! There are also variants for other quote macros from [syn] and [mod@quote]:
+//!
+//! - [`quote_use!`] and [`quote_spanned_use!`] as replacement for [`quote!`] and
+//! [`quote_spanned!`](quote::quote_spanned!) respectively
+//! - [`parse_quote_use!`] and [`parse_quote_spanned_use!`] for [`parse_quote!`](syn::parse_quote!)
+//! and [`parse_quote_spanned!`](syn::parse_quote_spanned!)
 use proc_macro2::{Ident, Spacing, TokenStream};
 use proc_macro_error::{abort, proc_macro_error};
 use quote::{quote, ToTokens};
@@ -125,7 +134,7 @@ pub fn quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     .into()
 }
 
-/// Like [`quote_use!`] but using [`parse_quote!`](syn::parse_quote)
+/// Like [`quote_use!`] but using [`parse_quote!`](syn::parse_quote!)
 /// ```
 /// # use quote_use::parse_quote_use;
 /// # use syn::{Expr, parse_quote};

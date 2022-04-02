@@ -58,3 +58,12 @@ but this can be configured via features, and also completely disabled.
 - **`prelude_std`**: Enables [`std::prelude::v1`](https://doc.rust-lang.org/nightly/std/prelude/v1/index.html)  (incompatible with `prelude_core`)
 - `prelude_core`: Enables [`core::prelude::v1`](https://doc.rust-lang.org/nightly/core/prelude/v1/index.html) (incompatible with `prelude_std`)
 - **`prelude_2021`**: Enables [`core::prelude::rust_2021`](https://doc.rust-lang.org/nightly/core/prelude/rust_2021/index.html) (requires either `prelude_std` or `prelude_core`)
+
+### Other quote macros
+
+There are also variants for other quote macros from [syn](https://docs.rs/syn/latest/syn/) and [quote](https://docs.rs/quote/latest/quote/):
+
+- [`quote_use!`](https://docs.rs/quote-use/latest/quote_use/macro.quote_use.html) and [`quote_spanned_use!`](https://docs.rs/quote-use/latest/quote_use/macro.quote_spanned_use.html) as replacement for [`quote!`](https://docs.rs/quote/latest/quote/macro.quote.html) and
+[`quote_spanned!`](https://docs.rs/quote/latest/quote/macro.quote_spanned.html) respectively
+- [`parse_quote_use!`](https://docs.rs/quote-use/latest/quote_use/macro.parse_quote_use.html) and [`parse_quote_spanned_use!`](https://docs.rs/quote-use/latest/quote_use/macro.parse_quote_spanned_use.html) for [`parse_quote!`](https://docs.rs/syn/latest/syn/macro.parse_quote.html)
+and [`parse_quote_spanned!`](https://docs.rs/syn/latest/syn/macro.parse_quote_spanned.html)
