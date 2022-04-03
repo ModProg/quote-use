@@ -73,7 +73,7 @@ use proc_macro_error::{abort, proc_macro_error};
 use quote::{quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
-    parse_macro_input, parse_quote, ItemUse, Path, Token, UseGroup, UseName, UsePath, UseTree,
+    parse_macro_input, parse_quote, ItemUse, Path, Token, UseGroup, UseName, UsePath, UseTree, Expr,
 };
 mod prelude;
 
@@ -202,10 +202,10 @@ pub fn parse_quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::To
 struct UsesSpanned(TokenStream, Uses);
 impl Parse for UsesSpanned {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let ident = Ident::parse(input)?;
+        let expr = Expr::parse(input)?;
         let arrow = <Token!(=>)>::parse(input)?;
 
-        Ok(Self(quote!(#ident #arrow), Uses::parse(input)?))
+        Ok(Self(quote!(#expr #arrow), Uses::parse(input)?))
     }
 }
 
