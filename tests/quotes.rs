@@ -18,6 +18,13 @@ fn quote_spanned() {
 }
 
 #[test]
+fn quote_spanned_empty() {
+    let quoted = quote_spanned! (Span::call_site()=>);
+    let quote_used = quote_spanned_use! (Span::call_site()=>);
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
+#[test]
 fn parse_quote_spanned() {
     let quoted: Expr = parse_quote_spanned! {Span::call_site()=>
         ::smth::ho::Name(10)
