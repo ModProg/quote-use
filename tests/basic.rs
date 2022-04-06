@@ -175,11 +175,11 @@ fn braces() {
 #[test]
 fn namespace_idents() {
     let quoted = quote! {
-        __quote_use_ident
+        __quote_use_ident;
     };
 
     let quote_used = quote_use! {
-        $ident
+         $ident;
     };
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }

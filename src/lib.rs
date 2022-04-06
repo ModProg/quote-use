@@ -264,6 +264,7 @@ fn replace_in_group(uses: &[Use], tokens: TokenStream, ident_prefix: Option<&str
                 proc_macro2::TokenTree::Ident(ident)
                     if !in_path && namespaced_ident && ident != "crate" =>
                 {
+                    namespaced_ident = false;
                     return format_ident!("{}{ident}", ident_prefix.expect("ident prefix is set"))
                         .into_token_stream()
                 }
