@@ -17,6 +17,7 @@ jobs:
           - --no-default-features
           - --no-default-features --features prelude_core,prelude_2021
           - --no-default-features --features prelude_core
+          - --features namespace_idents
 
     runs-on: ubuntu-latest
 

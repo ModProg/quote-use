@@ -68,12 +68,21 @@
 //! [`quote_spanned!`](quote::quote_spanned!) respectively
 //! - [`parse_quote_use!`] and [`parse_quote_spanned_use!`] for [`parse_quote!`](syn::parse_quote!)
 //! and [`parse_quote_spanned!`](syn::parse_quote_spanned!)
+//!
+//! ## Auto namespacing idents
+//!
+//! Until [`Span::def_site`](proc_macro::Span::def_site) is stabilized, identifiers in e.g. let
+//! bindings in proc-macro expansions can collide with e.g. constants.
+//!
+//! To circumvent this you can enable the feature `namespace_idents` which will replace all
+//! identifiers with autonamespaced ones using the pattern `"__{crate_name}_{ident}"`.
 use proc_macro2::{Ident, Spacing, TokenStream};
 use proc_macro_error::{abort, proc_macro_error};
-use quote::{quote, ToTokens};
+use quote::{format_ident, quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
-    parse_macro_input, parse_quote, ItemUse, Path, Token, UseGroup, UseName, UsePath, UseTree, Expr,
+    parse_macro_input, parse_quote, Expr, ItemUse, Path, Token, UseGroup, UseName, UsePath,
+    UseTree,
 };
 mod prelude;
 
@@ -227,16 +236,37 @@ impl ToTokens for Uses {
         let mut uses = uses.to_vec();
         uses.extend(prelude::prelude());
 
-        tokens.extend(replace_in_group(&uses, tail.clone()));
+        #[cfg(feature = "namespace_idents")]
+        let ident_prefix = Some(if let Ok(crate_name) = std::env::var("CARGO_PKG_NAME") {
+            format!("__{}_", crate_name.replace('-', "_"))
+        } else {
+            String::from("___procmacro_")
+        });
+
+        #[cfg(not(feature = "namespace_idents"))]
+        let ident_prefix: Option<String> = None;
+
+        tokens.extend(replace_in_group(
+            &uses,
+            tail.clone(),
+            ident_prefix.as_deref(),
+        ));
     }
 }
 
-fn replace_in_group(uses: &[Use], tokens: TokenStream) -> TokenStream {
+fn replace_in_group(uses: &[Use], tokens: TokenStream, ident_prefix: Option<&str>) -> TokenStream {
     let mut in_path = false;
+    let mut namespaced_ident = false;
     tokens
         .into_iter()
         .flat_map(|token| {
             match &token {
+                proc_macro2::TokenTree::Ident(ident)
+                    if !in_path && namespaced_ident && ident != "crate" =>
+                {
+                    return format_ident!("{}{ident}", ident_prefix.expect("ident prefix is set"))
+                        .into_token_stream()
+                }
                 proc_macro2::TokenTree::Ident(ident) if !in_path => {
                     if let Some(Use(path, _)) = uses.iter().find(|item| &item.1 == ident) {
                         return quote!(#path);
@@ -248,8 +278,14 @@ fn replace_in_group(uses: &[Use], tokens: TokenStream) -> TokenStream {
                     in_path = true
                 }
                 proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ':' => (),
+                proc_macro2::TokenTree::Punct(punct)
+                    if punct.as_char() == '$' && ident_prefix.is_some() =>
+                {
+                    namespaced_ident = true;
+                    return quote!();
+                }
                 proc_macro2::TokenTree::Group(group) => {
-                    let tokens = replace_in_group(uses, group.stream());
+                    let tokens = replace_in_group(uses, group.stream(), ident_prefix);
                     return match group.delimiter() {
                         proc_macro2::Delimiter::Parenthesis => quote!((#tokens)),
                         proc_macro2::Delimiter::Brace => quote!({#tokens}),
@@ -257,9 +293,16 @@ fn replace_in_group(uses: &[Use], tokens: TokenStream) -> TokenStream {
                         proc_macro2::Delimiter::None => tokens,
                     };
                 }
-                _ => in_path = false,
+                _ => {
+                    in_path = false;
+                }
             };
-            quote!(#token)
+            if namespaced_ident {
+                namespaced_ident = false;
+                quote!($#token)
+            } else {
+                quote!(#token)
+            }
         })
         .collect()
 }

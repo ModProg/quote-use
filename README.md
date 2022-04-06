@@ -67,3 +67,11 @@ There are also variants for other quote macros from [syn](https://docs.rs/syn/la
 [`quote_spanned!`](https://docs.rs/quote/latest/quote/macro.quote_spanned.html) respectively
 - [`parse_quote_use!`](https://docs.rs/quote-use/latest/quote_use/macro.parse_quote_use.html) and [`parse_quote_spanned_use!`](https://docs.rs/quote-use/latest/quote_use/macro.parse_quote_spanned_use.html) for [`parse_quote!`](https://docs.rs/syn/latest/syn/macro.parse_quote.html)
 and [`parse_quote_spanned!`](https://docs.rs/syn/latest/syn/macro.parse_quote_spanned.html)
+
+## Auto namespacing idents
+
+Until [`Span::def_site`](https://doc.rust-lang.org/stable/proc_macro/struct.Span.html#method.def_site) is stabilized, identifiers in e.g. let
+bindings in proc-macro expansions can collide with e.g. constants.
+
+To circumvent this you can enable the feature `namespace_idents` which will replace all
+identifiers with autonamespaced ones using the pattern `"__{crate_name}_{ident}"`.
