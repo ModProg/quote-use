@@ -76,14 +76,17 @@
 //!
 //! To circumvent this you can enable the feature `namespace_idents` which will replace all
 //! identifiers with autonamespaced ones using the pattern `"__{crate_name}_{ident}"`.
-use proc_macro2::{Ident, Spacing, Span, TokenStream};
+use proc_macro2::{Ident, Spacing, TokenStream};
 use proc_macro_error::{abort, proc_macro_error};
 use quote::{format_ident, quote, ToTokens};
+#[cfg(feature = "namespace_idents")]
+use syn::LitStr;
 use syn::{
     parse::{Parse, ParseStream},
-    parse_macro_input, parse_quote, Expr, ItemUse, LitStr, Path, Token, UseGroup, UseName, UsePath,
+    parse_macro_input, parse_quote, Expr, ItemUse, Path, Token, UseGroup, UseName, UsePath,
     UseTree,
 };
+
 mod prelude;
 
 /// [`quote!`] replacement that allows [using](https://doc.rust-lang.org/std/keyword.use.html) paths to be
