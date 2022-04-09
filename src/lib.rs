@@ -76,12 +76,12 @@
 //!
 //! To circumvent this you can enable the feature `namespace_idents` which will replace all
 //! identifiers with autonamespaced ones using the pattern `"__{crate_name}_{ident}"`.
-use proc_macro2::{Ident, Spacing, TokenStream};
+use proc_macro2::{Ident, Spacing, Span, TokenStream};
 use proc_macro_error::{abort, proc_macro_error};
 use quote::{format_ident, quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
-    parse_macro_input, parse_quote, Expr, ItemUse, Path, Token, UseGroup, UseName, UsePath,
+    parse_macro_input, parse_quote, Expr, ItemUse, LitStr, Path, Token, UseGroup, UseName, UsePath,
     UseTree,
 };
 mod prelude;
@@ -208,6 +208,61 @@ pub fn parse_quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::To
     .into()
 }
 
+/// [`format_ident!`](quote::format_ident) replacement that allows the auto namespacing matching the
+/// `quote!` macros of this crate.
+/// ```
+/// # use quote_use::format_ident_namespaced;
+/// format_ident_namespaced!("$ident_{}", 2usize)
+/// # ;
+/// ```
+#[proc_macro_error]
+#[proc_macro]
+#[cfg(feature = "namespace_idents")]
+pub fn format_ident_namespaced(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let format_input = parse_macro_input!(input as FormatInput);
+
+    quote! {
+        ::quote::format_ident!(#format_input)
+    }
+    .into()
+}
+
+#[cfg(feature = "namespace_idents")]
+struct FormatInput(LitStr, TokenStream);
+#[cfg(feature = "namespace_idents")]
+impl Parse for FormatInput {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let lit = input.parse()?;
+
+        Ok(Self(lit, input.parse()?))
+    }
+}
+#[cfg(feature = "namespace_idents")]
+impl ToTokens for FormatInput {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let Self(lit, tail) = self;
+
+        let lit_span = lit.span();
+
+        if let Some(lit) = lit.value().strip_prefix('$') {
+            LitStr::new(&format!("{}{}", ident_prefix(), lit), lit_span).to_tokens(tokens);
+        } else {
+            lit.to_tokens(tokens)
+        };
+
+        tail.to_tokens(tokens);
+    }
+}
+
+#[cfg(feature = "namespace_idents")]
+fn ident_prefix() -> String {
+    if let Ok(crate_name) = std::env::var("CARGO_PKG_NAME") {
+        format!("__{}_", crate_name.replace('-', "_"))
+    } else {
+        String::from("___procmacro_")
+    }
+}
+
 struct UsesSpanned(TokenStream, Uses);
 impl Parse for UsesSpanned {
     fn parse(input: ParseStream) -> syn::Result<Self> {
@@ -237,11 +292,7 @@ impl ToTokens for Uses {
         uses.extend(prelude::prelude());
 
         #[cfg(feature = "namespace_idents")]
-        let ident_prefix = Some(if let Ok(crate_name) = std::env::var("CARGO_PKG_NAME") {
-            format!("__{}_", crate_name.replace('-', "_"))
-        } else {
-            String::from("___procmacro_")
-        });
+        let ident_prefix = Some(ident_prefix());
 
         #[cfg(not(feature = "namespace_idents"))]
         let ident_prefix: Option<String> = None;
@@ -266,7 +317,7 @@ fn replace_in_group(uses: &[Use], tokens: TokenStream, ident_prefix: Option<&str
                 {
                     namespaced_ident = false;
                     return format_ident!("{}{ident}", ident_prefix.expect("ident prefix is set"))
-                        .into_token_stream()
+                        .into_token_stream();
                 }
                 proc_macro2::TokenTree::Ident(ident) if !in_path => {
                     if let Some(Use(path, _)) = uses.iter().find(|item| &item.1 == ident) {

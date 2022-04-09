@@ -171,7 +171,7 @@ fn braces() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(feature="namespace_idents")]
+#[cfg(feature = "namespace_idents")]
 #[test]
 fn namespace_idents() {
     let quoted = quote! {
@@ -181,5 +181,18 @@ fn namespace_idents() {
     let quote_used = quote_use! {
          $ident;
     };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
+#[cfg(feature = "namespace_idents")]
+#[test]
+fn format_ident_namespaced() {
+    use quote::format_ident;
+    use quote_use::format_ident_namespaced;
+
+    let quoted = format_ident!("__quote_use_ident_{}", 2usize);
+
+    let quote_used = format_ident_namespaced!("$ident_{}", 2usize);
+
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
