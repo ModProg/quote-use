@@ -8,16 +8,23 @@ fn r#use() {
     };
 
     let quote_used = quote_use! {
-        use ::smth::ho::Name;
+        # use ::smth::ho::Name;
 
         Name(10)
     };
     assert_eq!(quote_used.to_string(), quoted.to_string());
 
     let quote_used = quote_use! {
-        use smth::ho::Name;
+        # use smth::ho::Name;
 
         Name(10)
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+
+    let quote_used = quote_use! {
+        # use smth::ho::Name as Something;
+
+        Something(10)
     };
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
@@ -82,7 +89,7 @@ fn prelude_override() {
     };
 
     let quote_used = quote_use! {
-        use anyhow::Result;
+        # use anyhow::Result;
 
         Result
     };
@@ -97,11 +104,29 @@ fn ident_in_path() {
     };
 
     let quote_used = quote_use! {
-        use ::smth::ho::Name;
+        # use ::smth::ho::Name;
 
         Name(10);
         other::Name(10)
     };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
+#[test]
+fn ident_in_var() {
+    let name = "";
+    let quoted = quote! {
+        ::smth::ho::name(10);
+        #name
+    };
+
+    let quote_used = quote_use! {
+        # use ::smth::ho::name;
+
+        name(10);
+        #name
+    };
+
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
@@ -113,7 +138,7 @@ fn module() {
     };
 
     let quote_used = quote_use! {
-        use ::smth::ho;
+        # use ::smth::ho;
 
         ho::Name(10);
         other::Name(10)
@@ -130,9 +155,18 @@ fn group() {
     };
 
     let quote_used = quote_use! {
-        use ::smth::ho::{Name, Ident, module::{another::Strange, something::anything}};
+        # use ::smth::ho::{Name, Ident, module::{another::Strange, something::anything}};
 
         Name(10);
+        Strange;
+        other::Name(10)
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+
+    let quote_used = quote_use! {
+        # use ::smth::ho::{Name as SomethingElse, Ident, module::{another::Strange, something::anything}};
+
+        SomethingElse(10);
         Strange;
         other::Name(10)
     };
@@ -146,10 +180,19 @@ fn self_in_group() {
     };
 
     let quote_used = quote_use! {
-        use ::smth::ho::{self, Ident};
+        # use ::smth::ho::{self, Ident};
 
         ho::Name(10);
     };
+
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+
+    let quote_used = quote_use! {
+        # use ::smth::ho::{self as test, Ident};
+
+        test::Name(10);
+    };
+
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
@@ -162,12 +205,36 @@ fn braces() {
     };
 
     let quote_used = quote_use! {
-        use ::smth::ho::Name;
+        # use ::smth::ho::Name;
 
         {Name(10)}
         [Name(10)]
         (Name(10))
     };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
+#[test]
+fn var_in_path() {
+    let root = quote!(::smth::ho);
+    let quoted = quote! {
+        #root::Name(10);
+    };
+
+    let quote_used = quote_use! {
+        # use #root::Name;
+
+        Name(10);
+    };
+
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+    let root = quote!(::smth::ho::);
+    let quote_used = quote_use! {
+        # use #root Name;
+
+        Name(10);
+    };
+
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 

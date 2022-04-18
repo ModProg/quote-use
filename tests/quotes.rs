@@ -10,7 +10,7 @@ fn quote_spanned() {
     };
 
     let quote_used = quote_spanned_use! {Span::call_site()=>
-        use smth::ho::Name;
+        # use smth::ho::Name;
 
         Name(10)
     };
@@ -31,7 +31,7 @@ fn parse_quote_spanned() {
     };
 
     let quote_used: Expr = parse_quote_spanned_use! {Span::call_site()=>
-        use smth::ho::Name;
+        # use smth::ho::Name;
 
         Name(10)
     };
@@ -48,7 +48,7 @@ fn parse_quote() {
     };
 
     let quote_used: Expr = parse_quote_use! {
-        use smth::ho::Name;
+        # use smth::ho::Name;
 
         Name(10)
     };
