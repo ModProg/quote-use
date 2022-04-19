@@ -85,7 +85,7 @@ use syn::LitStr;
 use syn::{
     ext::IdentExt,
     group::{parse_braces, Braces},
-    parse::{Nothing, Parse, ParseStream},
+    parse::{Parse, ParseStream},
     parse_macro_input, parse_quote,
     punctuated::Punctuated,
     token::Brace,
