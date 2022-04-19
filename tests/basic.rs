@@ -33,7 +33,7 @@ fn r#use() {
 #[test]
 fn prelude() {
     let quoted = quote! {
-        ::core::prelude::v1::Option::Some(10)
+        ::core::prelude::v1::Some(10)
     };
 
     let quote_used = quote_use! {
