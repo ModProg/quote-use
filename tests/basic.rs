@@ -33,7 +33,7 @@ fn r#use() {
 #[test]
 fn prelude() {
     let quoted = quote! {
-        ::core::option::Option::Some(10)
+        ::core::prelude::v1::Option::Some(10)
     };
 
     let quote_used = quote_use! {
@@ -42,11 +42,11 @@ fn prelude() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(all(feature = "prelude_2021", feature = "prelude_core"))]
+#[cfg(all(feature = "prelude_2021"))]
 #[test]
 fn prelude_2021() {
     let quoted = quote! {
-        ::core::iter::FromIterator
+        ::core::prelude::rust_2021::FromIterator
     };
 
     let quote_used = quote_use! {
@@ -59,7 +59,7 @@ fn prelude_2021() {
 #[test]
 fn prelude() {
     let quoted = quote! {
-        ::std::string::String::new("hello")
+        ::std::prelude::v1::String::new("hello")
     };
 
     let quote_used = quote_use! {
@@ -68,18 +68,19 @@ fn prelude() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(all(feature = "prelude_2021", feature = "prelude_std"))]
-#[test]
-fn prelude_2021() {
-    let quoted = quote! {
-        ::std::iter::FromIterator
-    };
-
-    let quote_used = quote_use! {
-        FromIterator
-    };
-    assert_eq!(quote_used.to_string(), quoted.to_string());
-}
+// TODO maybe seperate `prelude_2021`s
+// #[cfg(all(feature = "prelude_2021", feature = "prelude_std"))]
+// #[test]
+// fn prelude_2021() {
+//     let quoted = quote! {
+//         ::std::iter::FromIterator
+//     };
+//
+//     let quote_used = quote_use! {
+//         FromIterator
+//     };
+//     assert_eq!(quote_used.to_string(), quoted.to_string());
+// }
 
 #[cfg(any(feature = "prelude_core", feature = "prelude_std"))]
 #[test]
