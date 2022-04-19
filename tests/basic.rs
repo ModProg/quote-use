@@ -155,7 +155,7 @@ fn group() {
     };
 
     let quote_used = quote_use! {
-        # use ::smth::ho::{Name, Ident, module::{another::Strange, something::anything}};
+        # use ::smth::ho::{Name, Ident, module::{something::anything, another::Strange}};
 
         Name(10);
         Strange;

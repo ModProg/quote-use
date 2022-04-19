@@ -85,7 +85,7 @@ use syn::LitStr;
 use syn::{
     ext::IdentExt,
     group::{parse_braces, Braces},
-    parse::{Parse, ParseStream},
+    parse::{Nothing, Parse, ParseStream},
     parse_macro_input, parse_quote,
     punctuated::Punctuated,
     token::Brace,
@@ -459,7 +459,7 @@ impl Use {
 
             while !input.is_empty() {
                 if let Ok(star) = input.parse::<Token![*]>() {
-                    if input.peek(Token![;]) || input.peek(Token![,]) {
+                    if input.peek(Token![;]) || input.peek(Token![,]) || input.is_empty() {
                         abort!(star, "wildcards are not supported")
                     } else {
                         star.to_tokens(&mut path);
@@ -480,20 +480,10 @@ impl Use {
                         None
                     };
 
-                    if input.parse::<Token![;]>().is_ok() {
-                        if ident == "self" {
-                            if !path.is_empty() {
-                                abort!(ident, "The `self` keyword is only allowed as the first segment of a path")
-                            }
-                            uses.push(InnerUse(None, alias));
-                        } else {
-                            uses.push(InnerUse::some(
-                                quote!(#path #tail #ident),
-                                alias.unwrap_or(ident),
-                            ));
-                        }
-                        break;
-                    } else if input.peek(Token![,]) {
+                    if input.parse::<Token![;]>().is_ok()
+                        || input.peek(Token![,])
+                        || input.is_empty()
+                    {
                         if ident == "self" {
                             if !path.is_empty() {
                                 abort!(ident, "The `self` keyword is only allowed as the first segment of a path")
