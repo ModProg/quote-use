@@ -7,7 +7,7 @@ keywords = ["macro"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/ModProg/quote-use"
-version = "0.4.3"
+version = "0.5.0"
 edition = "2021"
 name = "quote-use"
 
@@ -21,8 +21,8 @@ quote = "1.0.17"
 syn = { version = "1.0.90", features = ["full"] }
 
 [features]
-default = ["prelude_std", "prelude_2021"]
+default = ["prelude_2021", "prelude_std"]
 prelude_core = []
-prelude_std = []
-prelude_2021 = []
+prelude_std = ["prelude_core"]
+prelude_2021 = ["prelude_core"]
 namespace_idents = []
