@@ -84,12 +84,12 @@ use quote::{format_ident, quote, ToTokens};
 #[cfg(feature = "namespace_idents")]
 use syn::LitStr;
 use syn::{
+    braced,
     ext::IdentExt,
-    group::{parse_braces, Braces},
-    parse::{Parse, ParseStream},
+    parse::{Parse, ParseBuffer, ParseStream},
     parse_macro_input, parse_quote,
     punctuated::Punctuated,
-    token::Brace,
+    token::{self, Brace},
     Expr, ItemUse, Result, Token, UseGroup, UseName, UsePath, UseTree,
 };
 
@@ -511,7 +511,9 @@ impl Use {
                     colon2.to_tokens(&mut path);
                     continue;
                 }
-                if let Ok(Braces { content, .. }) = parse_braces(input) {
+                if input.peek(token::Brace) {
+                    let content: ParseBuffer;
+                    braced!(content in input);
                     let inner: Punctuated<Vec<InnerUse>, Token![,]> =
                         Punctuated::parse_terminated_with(&content, parse_inner)?;
                     uses.extend(inner.into_iter().flatten().map(|InnerUse(inner, ident)| {
@@ -538,7 +540,7 @@ impl Use {
                     }
                     continue;
                 }
-                // parse `#` so that variables expanded by quote like `#smth` are consumed in on go
+                // parse `#` so that variables expanded by quote like `#smth` are consumed in one go
                 input.parse::<Token![#]>().ok().to_tokens(&mut path);
                 input
                     .parse::<proc_macro2::TokenTree>()?
