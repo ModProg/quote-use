@@ -19,7 +19,7 @@ derive-where = "1"
 proc-macro-error = "1"
 proc-macro2 = "1"
 quote = "1"
-syn = "1"
+syn = "1.0.84"
 
 [features]
 default = ["prelude_2021", "prelude_std"]
