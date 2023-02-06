@@ -2,12 +2,12 @@
 categories = ["rust-patterns", "development-tools::procedural-macro-helpers", "parsing"]
 description = "Support `use` in procmacros hygienically"
 documentation = "https://docs.rs/quote-use"
-include = ["src/**/*", "Cargo.toml", "LICENSE", "README.md"]
+include = ["src/**/*", "LICENSE", "README.md"]
 keywords = ["macro"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/ModProg/quote-use"
-version = "0.5.1"
+version = "0.6.0"
 edition = "2021"
 name = "quote-use"
 
@@ -15,10 +15,11 @@ name = "quote-use"
 proc-macro = true
 
 [dependencies]
-proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.36"
-quote = "1.0.17"
-syn = { version = "1.0.90", features = ["full"] }
+derive-where = "1"
+proc-macro-error = "1"
+proc-macro2 = "1"
+quote = "1"
+syn = "1"
 
 [features]
 default = ["prelude_2021", "prelude_std"]
@@ -26,3 +27,6 @@ prelude_core = []
 prelude_std = ["prelude_core"]
 prelude_2021 = ["prelude_core"]
 namespace_idents = []
+
+[dev-dependencies]
+pretty_assertions = "1"

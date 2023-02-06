@@ -215,9 +215,9 @@ fn var_in_path() {
     };
 
     assert_eq!(quote_used.to_string(), quoted.to_string());
-    let root = quote!(::smth::ho::);
+    let root = quote!(::smth::ho);
     let quote_used = quote_use! {
-        # use #root Name;
+        # use #root::Name;
 
         Name(10);
     };

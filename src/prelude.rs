@@ -1,6 +1,6 @@
-use syn::{parse_str, File, Item};
+use syn::{parse::Parser, punctuated::Punctuated, Token};
 
-use crate::Use;
+use crate::{use_parser::UseItem, Use};
 
 #[cfg(all(feature = "prelude_2021", not(feature = "prelude_core")))]
 compile_error!("prelude_2021 only works when prelude_core is enabled");
@@ -23,12 +23,10 @@ pub(crate) fn prelude() -> impl Iterator<Item = Use> {
 }
 
 fn parse_prelude(file: &str) -> impl Iterator<Item = Use> {
-    let statements: File = parse_str(file).unwrap();
-    statements
-        .items
+    Punctuated::<UseItem, Token![;]>::parse_terminated
+        .parse_str(file)
+        .expect("prelude should be valid")
         .into_iter()
-        .flat_map(move |expr| match expr {
-            Item::Use(item_use) => Use::from_item_use(item_use),
-            _ => Vec::new(),
-        })
+        .map(|u| u.0.into_iter())
+        .flatten()
 }

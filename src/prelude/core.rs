@@ -1,4 +1,4 @@
-pub use core::prelude::v1::{
+use core::prelude::v1::{
     assert, bench, cfg, cfg_accessible, cfg_eval, column, compile_error, concat, concat_bytes,
     concat_idents, derive, drop, env, file, format_args, format_args_nl, global_allocator, include,
     include_bytes, include_str, line, log_syntax, module_path, option_env, stringify, test,
