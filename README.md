@@ -1,6 +1,6 @@
 # Use statements in `quote!`
 [![Crates.io Version](https://img.shields.io/crates/v/quote-use.svg)](https://crates.io/crates/quote-use)
-[![Live Build Status](https://img.shields.io/github/workflow/status/ModProg/quote-use/Test/main)](https://github.com/ModProg/quote-use/actions/workflows/test.yml)
+[![CI](https://github.com/ModProg/quote-use/actions/workflows/test.yml/badge.svg)](https://github.com/ModProg/quote-use/actions/workflows/test.yml)
 [![Docs.rs Documentation](https://img.shields.io/docsrs/quote-use)](https://docs.rs/crate/quote-use)
 
 ## Description
