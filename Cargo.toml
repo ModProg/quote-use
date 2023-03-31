@@ -7,7 +7,7 @@ keywords = ["macro"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/ModProg/quote-use"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 name = "quote-use"
 
@@ -19,7 +19,7 @@ derive-where = "1"
 proc-macro-error = "1"
 proc-macro2 = "1"
 quote = "1"
-syn = "1.0.84"
+syn = "2"
 
 [features]
 default = ["prelude_2021", "prelude_std"]

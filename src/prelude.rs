@@ -27,6 +27,5 @@ fn parse_prelude(file: &str) -> impl Iterator<Item = Use> {
         .parse_str(file)
         .expect("prelude should be valid")
         .into_iter()
-        .map(|u| u.0.into_iter())
-        .flatten()
+        .flat_map(|u| u.0.into_iter())
 }

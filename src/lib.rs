@@ -76,9 +76,16 @@
 //! bindings in proc-macro expansions can collide with e.g. constants.
 //!
 //! To circumvent this you can enable the feature `namespace_idents` which will replace all
-//! identifiers with autonamespaced ones using the pattern `"__{crate_name}_{ident}"`.
+//! identifiers and lifetimes prefixed with `$` with autonamespaced ones using the pattern `"__{crate_name}_{ident}"`.
+//! A `$` can be escaped by doubling it `$$`.
+//!
+//! ```text
+//! $ident      ->  __crate_name_ident
+//! $'lifetime  ->  '__crate_name_lifetime
+//! $$ident     ->  $ident
+//! ```
 
-use proc_macro2::{Spacing, TokenStream};
+use proc_macro2::{Punct, Spacing, TokenStream, TokenTree};
 use proc_macro_error::proc_macro_error;
 use quote::{format_ident, quote, ToTokens};
 #[cfg(feature = "namespace_idents")]
@@ -314,39 +321,82 @@ impl ToTokens for QuoteUse {
 }
 
 fn replace_in_group(uses: &[Use], tokens: TokenStream, ident_prefix: Option<&str>) -> TokenStream {
-    let mut in_path = false;
-    let mut in_var = false;
-    let mut namespaced_ident = false;
+    use State::*;
+    #[derive(Clone, Copy)]
+    enum State {
+        Path,
+        Pound,
+        Dollar,
+        DollarQuote,
+        Normal,
+    }
+    impl ToTokens for State {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                Path | Normal | Pound => {}
+                Dollar => quote!($).to_tokens(tokens),
+                DollarQuote => unreachable!("lifetime `'` must be followed by ident"),
+            }
+        }
+    }
+    let mut state = Normal;
+
     tokens
         .into_iter()
         .flat_map(|token| {
-            match &token {
-                proc_macro2::TokenTree::Ident(ident)
-                    if !in_path && namespaced_ident && ident != "crate" =>
-                {
-                    namespaced_ident = false;
+            let mut prev = Normal;
+            match (&token, state) {
+                (TokenTree::Ident(ident), Dollar) if ident != "crate" => {
+                    state = Normal;
                     return format_ident!("{}{ident}", ident_prefix.expect("ident prefix is set"))
                         .into_token_stream();
                 }
-                proc_macro2::TokenTree::Ident(ident) if !(in_path || in_var) => {
+                (TokenTree::Ident(ident), DollarQuote) => {
+                    state = Normal;
+                    return [
+                        TokenTree::from(Punct::new('\'', Spacing::Joint)),
+                        format_ident!("{}{ident}", ident_prefix.expect("ident prefix is set"))
+                            .into(),
+                    ]
+                    .into_iter()
+                    .collect();
+                }
+                (TokenTree::Ident(ident), Normal) => {
                     if let Some(Use(path, _)) = uses.iter().find(|item| &item.1 == ident) {
                         return quote!(#path);
                     }
                 }
-                proc_macro2::TokenTree::Punct(punct)
+                // first colon
+                (TokenTree::Punct(punct), _)
                     if punct.spacing() == Spacing::Joint && punct.as_char() == ':' =>
                 {
-                    in_path = true
+                    prev = state;
+                    state = Path;
                 }
-                proc_macro2::TokenTree::Punct(punct) if punct.as_char() == ':' => (),
-                proc_macro2::TokenTree::Punct(punct) if punct.as_char() == '#' => in_var = true,
-                proc_macro2::TokenTree::Punct(punct)
+                // second colon
+                (TokenTree::Punct(punct), _) if punct.as_char() == ':' => (),
+                // quote var `#ident`
+                (TokenTree::Punct(punct), _) if punct.as_char() == '#' => {
+                    prev = state;
+                    state = Pound;
+                }
+                // $$ escapes to just $
+                (TokenTree::Punct(punct), Dollar) if punct.as_char() == '$' => {
+                    state = Normal;
+                }
+                (TokenTree::Punct(punct), Normal | Pound | Path)
                     if punct.as_char() == '$' && ident_prefix.is_some() =>
                 {
-                    namespaced_ident = true;
+                    state = Dollar;
                     return quote!();
                 }
-                proc_macro2::TokenTree::Group(group) => {
+                (TokenTree::Punct(punct), Dollar)
+                    if punct.as_char() == '\'' && ident_prefix.is_some() =>
+                {
+                    state = DollarQuote;
+                    return quote!();
+                }
+                (TokenTree::Group(group), _) => {
                     let tokens = replace_in_group(uses, group.stream(), ident_prefix);
                     return match group.delimiter() {
                         proc_macro2::Delimiter::Parenthesis => quote!((#tokens)),
@@ -356,16 +406,11 @@ fn replace_in_group(uses: &[Use], tokens: TokenStream, ident_prefix: Option<&str
                     };
                 }
                 _ => {
-                    in_path = false;
-                    in_var = false;
+                    prev = state;
+                    state = Normal;
                 }
             };
-            if namespaced_ident {
-                namespaced_ident = false;
-                quote!($#token)
-            } else {
-                quote!(#token)
-            }
+            quote!(#prev #token)
         })
         .collect()
 }

@@ -228,12 +228,26 @@ fn var_in_path() {
 #[cfg(feature = "namespace_idents")]
 #[test]
 fn namespace_idents() {
+    let var = "var";
+    let __quote_use_var = "quote_use_var";
+
     let quoted = quote! {
         __quote_use_ident;
+        $__quote_use_ident;
+        $::path;
+        ::__quote_use_path;
+        #__quote_use_var;
+        $#var;
+        '__quote_use_lifetime;
     };
-
     let quote_used = quote_use! {
-         $ident;
+        $ident;
+        $$$ident;
+        $::path;
+        ::$path;
+        #$var;
+        $#var;
+        $'lifetime;
     };
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
