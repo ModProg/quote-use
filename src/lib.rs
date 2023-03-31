@@ -109,7 +109,8 @@ mod use_parser;
 /// automaticly replaced.
 ///
 /// It supports both the explicit use via `use some::path::Type;` and the use of
-/// the rust prelude: ```
+/// the rust prelude:
+/// ```
 /// # use quote_use::quote_use;
 /// quote_use! {
 ///     ## use std::fs::read;
@@ -193,8 +194,8 @@ pub fn parse_quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     .into()
 }
 
-/// Like [`quote_spanned_use!`] but using
-/// [`parse_quote_spanned!`](syn::parse_quote_spanned) ```
+/// Like [`quote_spanned_use!`] but using [`parse_quote_spanned!`](syn::parse_quote_spanned)
+/// ```
 /// # use quote_use::parse_quote_spanned_use;
 /// # use syn::{parse_quote_spanned, Expr, spanned::Spanned};
 /// # use proc_macro2::Span;
