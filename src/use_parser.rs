@@ -1,13 +1,10 @@
 use derive_where::derive_where;
 use proc_macro2::{Ident, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
-use syn::{
-    braced,
-    ext::IdentExt,
-    parse::{Parse, ParseStream},
-    token::Brace,
-    Error, Result, Token,
-};
+use syn::ext::IdentExt;
+use syn::parse::{Parse, ParseStream};
+use syn::token::Brace;
+use syn::{braced, Error, Result, Token};
 
 #[derive_where(Debug)]
 #[derive(Clone)]
@@ -197,7 +194,8 @@ impl Parse for UseItem {
 mod test {
     use pretty_assertions::assert_eq;
     use quote::ToTokens;
-    use syn::{parse::Parser, parse_str};
+    use syn::parse::Parser;
+    use syn::parse_str;
 
     use super::*;
 

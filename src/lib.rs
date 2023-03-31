@@ -4,8 +4,8 @@
 //!
 //! # Usage
 //!
-//! The [`quote_use!`] macro can be used just like [`quote!`], but with the added functionality of
-//! adding use statements at the top:
+//! The [`quote_use!`] macro can be used just like [`quote!`], but with the
+//! added functionality of adding use statements at the top:
 //!
 //! ```
 //! # use quote_use::quote_use;
@@ -39,8 +39,8 @@
 //! # ;
 //! ```
 //! ### Overriding prelude
-//! When you want to use your own type instead of the prelude type this can be achieved by simply
-//! importing it like so
+//! When you want to use your own type instead of the prelude type this can be
+//! achieved by simply importing it like so
 //!
 //! ```
 //! # use quote_use::quote_use;
@@ -53,31 +53,38 @@
 //! ```
 //! ### Different preludes
 //!
-//! By default [`quote_use!`] uses the [std prelude](std::prelude), [core prelude](core::prelude) and [2021 edition prelude](std::prelude::rust_2021),
+//! By default [`quote_use!`] uses the [std prelude](std::prelude), [core
+//! prelude](core::prelude) and [2021 edition prelude](std::prelude::rust_2021),
 //! but this can be configured via features, and also completely disabled.
 //!
 //! - **`prelude_core`**: Enables [`core::prelude::v1`]
-//! - **`prelude_std`**: Enables [`std::prelude::v1`]  (Adds only those missing in core and enables
+//! - **`prelude_std`**: Enables [`std::prelude::v1`]  (Adds only those missing
+//!   in core and enables
 //! also `prelude_core`)
-//! - **`prelude_2021`**: Enables [`core::prelude::rust_2021`] (enables also `prelude_core`)
+//! - **`prelude_2021`**: Enables [`core::prelude::rust_2021`] (enables also
+//!   `prelude_core`)
 //!
 //! ## Other quote macros
 //!
 //! There are also variants for other quote macros from [syn] and [mod@quote]:
 //!
-//! - [`quote_use!`] and [`quote_spanned_use!`] as replacement for [`quote!`] and
+//! - [`quote_use!`] and [`quote_spanned_use!`] as replacement for [`quote!`]
+//!   and
 //! [`quote_spanned!`](quote::quote_spanned!) respectively
-//! - [`parse_quote_use!`] and [`parse_quote_spanned_use!`] for [`parse_quote!`](syn::parse_quote!)
+//! - [`parse_quote_use!`] and [`parse_quote_spanned_use!`] for
+//!   [`parse_quote!`](syn::parse_quote!)
 //! and [`parse_quote_spanned!`](syn::parse_quote_spanned!)
 //!
 //! ## Auto namespacing idents
 //!
-//! Until [`Span::def_site`](proc_macro::Span::def_site) is stabilized, identifiers in e.g. let
-//! bindings in proc-macro expansions can collide with e.g. constants.
+//! Until [`Span::def_site`](proc_macro::Span::def_site) is stabilized,
+//! identifiers in e.g. let bindings in proc-macro expansions can collide with
+//! e.g. constants.
 //!
-//! To circumvent this you can enable the feature `namespace_idents` which will replace all
-//! identifiers and lifetimes prefixed with `$` with autonamespaced ones using the pattern `"__{crate_name}_{ident}"`.
-//! A `$` can be escaped by doubling it `$$`.
+//! To circumvent this you can enable the feature `namespace_idents` which will
+//! replace all identifiers and lifetimes prefixed with `$` with autonamespaced
+//! ones using the pattern `"__{crate_name}_{ident}"`. A `$` can be escaped by
+//! doubling it `$$`.
 //!
 //! ```text
 //! $ident      ->  __crate_name_ident
@@ -88,12 +95,10 @@
 use proc_macro2::{Punct, Spacing, TokenStream, TokenTree};
 use proc_macro_error::proc_macro_error;
 use quote::{format_ident, quote, ToTokens};
+use syn::parse::{Parse, ParseStream};
 #[cfg(feature = "namespace_idents")]
 use syn::LitStr;
-use syn::{
-    parse::{Parse, ParseStream},
-    parse_macro_input, Expr, Result, Token,
-};
+use syn::{parse_macro_input, Expr, Result, Token};
 use use_parser::{Use, UseItem};
 
 mod prelude;
@@ -103,8 +108,8 @@ mod use_parser;
 /// [`quote!`] replacement that allows [using](https://doc.rust-lang.org/std/keyword.use.html) paths to be
 /// automaticly replaced.
 ///
-/// It supports both the explicit use via `use some::path::Type;` and the use of the rust prelude:
-/// ```
+/// It supports both the explicit use via `use some::path::Type;` and the use of
+/// the rust prelude: ```
 /// # use quote_use::quote_use;
 /// quote_use! {
 ///     ## use std::fs::read;
@@ -188,8 +193,8 @@ pub fn parse_quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     .into()
 }
 
-/// Like [`quote_spanned_use!`] but using [`parse_quote_spanned!`](syn::parse_quote_spanned)
-/// ```
+/// Like [`quote_spanned_use!`] but using
+/// [`parse_quote_spanned!`](syn::parse_quote_spanned) ```
 /// # use quote_use::parse_quote_spanned_use;
 /// # use syn::{parse_quote_spanned, Expr, spanned::Spanned};
 /// # use proc_macro2::Span;
@@ -222,8 +227,8 @@ pub fn parse_quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::To
     .into()
 }
 
-/// [`format_ident!`](quote::format_ident) replacement that allows the auto namespacing matching the
-/// `quote!` macros of this crate.
+/// [`format_ident!`](quote::format_ident) replacement that allows the auto
+/// namespacing matching the `quote!` macros of this crate.
 /// ```
 /// # use quote_use::format_ident_namespaced;
 /// format_ident_namespaced!("$ident_{}", 2usize)

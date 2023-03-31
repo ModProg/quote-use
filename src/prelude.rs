@@ -1,6 +1,9 @@
-use syn::{parse::Parser, punctuated::Punctuated, Token};
+use syn::parse::Parser;
+use syn::punctuated::Punctuated;
+use syn::Token;
 
-use crate::{use_parser::UseItem, Use};
+use crate::use_parser::UseItem;
+use crate::Use;
 
 #[cfg(all(feature = "prelude_2021", not(feature = "prelude_core")))]
 compile_error!("prelude_2021 only works when prelude_core is enabled");
