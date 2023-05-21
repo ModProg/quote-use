@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+- Removed `proc-macro-error` dependency
+
 ## [0.7.0]
 - **Breaking Change**: `$'lifetime` is supported with `namespace_idents` feature
 - Updated `syn` to version 2
@@ -11,8 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.6.0]
 ### Changed
 - Reduced required features of `syn`
-- **Breaking Change**: `# use #var path::Value` is no longer supported, use `#
-    use #var::path::Value` instead
+- **Breaking Change**: `# use #var path::Value` is no longer supported, use `# use #var::path::Value` instead
 
 [unreleased]: https://github.com/ModProg/quote-use/compare/v0.7.0...HEAD
 [0.7.0]: https://github.com/ModProg/quote-use/compare/v0.6.0...v0.7.0
