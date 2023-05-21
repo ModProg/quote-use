@@ -16,7 +16,6 @@ proc-macro = true
 
 [dependencies]
 derive-where = "1"
-proc-macro-error = "1"
 proc-macro2 = "1"
 quote = "1"
 syn = "2"

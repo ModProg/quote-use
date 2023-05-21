@@ -93,7 +93,6 @@
 //! ```
 
 use proc_macro2::{Punct, Spacing, TokenStream, TokenTree};
-use proc_macro_error::proc_macro_error;
 use quote::{format_ident, quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 #[cfg(feature = "namespace_idents")]
@@ -121,7 +120,6 @@ mod use_parser;
 /// }
 /// # ;
 /// ```
-#[proc_macro_error]
 #[proc_macro]
 pub fn quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let uses = parse_macro_input!(input as QuoteUse);
@@ -149,7 +147,6 @@ pub fn quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 /// # ;
 /// ```
-#[proc_macro_error]
 #[proc_macro]
 pub fn quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let UsesSpanned(spanned, uses) = parse_macro_input!(input as UsesSpanned);
@@ -181,7 +178,6 @@ pub fn quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 /// #   expected.to_token_stream().to_string()
 /// # };
 /// ```
-#[proc_macro_error]
 #[proc_macro]
 pub fn parse_quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let uses = parse_macro_input!(input as QuoteUse);
@@ -194,7 +190,8 @@ pub fn parse_quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     .into()
 }
 
-/// Like [`quote_spanned_use!`] but using [`parse_quote_spanned!`](syn::parse_quote_spanned)
+/// Like [`quote_spanned_use!`] but using
+/// [`parse_quote_spanned!`](syn::parse_quote_spanned)
 /// ```
 /// # use quote_use::parse_quote_spanned_use;
 /// # use syn::{parse_quote_spanned, Expr, spanned::Spanned};
@@ -214,7 +211,6 @@ pub fn parse_quote_use(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// #   expected.to_token_stream().to_string()
 /// # };
 /// ```
-#[proc_macro_error]
 #[proc_macro]
 pub fn parse_quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let UsesSpanned(spanned, uses) = parse_macro_input!(input as UsesSpanned);
@@ -235,7 +231,6 @@ pub fn parse_quote_spanned_use(input: proc_macro::TokenStream) -> proc_macro::To
 /// format_ident_namespaced!("$ident_{}", 2usize)
 /// # ;
 /// ```
-#[proc_macro_error]
 #[proc_macro]
 #[cfg(feature = "namespace_idents")]
 pub fn format_ident_namespaced(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
