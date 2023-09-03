@@ -11,7 +11,7 @@ keywords = ["macro"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/ModProg/quote-use"
-version = "0.7.1"
+version = "0.7.2"
 edition = "2021"
 name = "quote-use"
 
@@ -20,7 +20,7 @@ name = "quote-use"
 [dependencies]
 quote = "1"
 syn = "2"
-quote-use-macros = { version = "0.7.1", path = "quote-use-macros" }
+quote-use-macros = { version = "0.7.2", path = "quote-use-macros" }
 
 [features]
 default = ["prelude_2021", "prelude_std"]
