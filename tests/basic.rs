@@ -42,7 +42,7 @@ fn prelude_core() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(all(feature = "prelude_2021"))]
+#[cfg(feature = "prelude_2021")]
 #[test]
 fn prelude_2021() {
     let quoted = quote! {
