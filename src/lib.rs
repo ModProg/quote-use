@@ -74,27 +74,70 @@
 //! - [`parse_quote_use!`] and [`parse_quote_spanned_use!`] for
 //!   [`parse_quote!`](syn::parse_quote!)
 //! and [`parse_quote_spanned!`](syn::parse_quote_spanned!)
-//!
-//! ## Auto namespacing idents
-//!
-//! Until [`Span::def_site`](proc_macro::Span::def_site) is stabilized,
-//! identifiers in e.g. let bindings in proc-macro expansions can collide with
-//! e.g. constants.
-//!
-//! To circumvent this you can enable the feature `namespace_idents` which will
-//! replace all identifiers and lifetimes prefixed with `$` with autonamespaced
-//! ones using the pattern `"__{crate_name}_{ident}"`. A `$` can be escaped by
-//! doubling it `$$`.
-//!
-//! ```text
-//! $ident      ->  __crate_name_ident
-//! $'lifetime  ->  '__crate_name_lifetime
-//! $$ident     ->  $ident
-//! ```
 #[doc(hidden)]
 pub mod __private {
     pub use quote;
+    pub use quote_use_macros::quote_use_impl;
+    #[cfg(feature = "syn")]
     pub use syn;
 }
 
-pub use quote_use_macros::*;
+#[macro_export]
+macro_rules! quote_use {
+    ($($tokens:tt)*) => {
+        $crate::__private::quote_use_impl!{($crate::__private::quote::quote) () ($($tokens)*)}
+    };
+}
+
+#[macro_export]
+macro_rules! quote_spanned_use {
+    ($span:expr => $($tokens:tt)*) => {
+        $crate::__private::quote_use_impl!{($crate::__private::quote::quote_spanned) ($span =>) ($($tokens)*)}
+    };
+}
+
+#[cfg(feature = "syn")]
+#[macro_export]
+macro_rules! parse_quote_use {
+    ($($tokens:tt)*) => {
+        $crate::__private::quote_use_impl!{($crate::__private::syn::parse_quote) () ($($tokens)*)}
+    };
+}
+
+#[cfg(feature = "syn")]
+#[macro_export]
+macro_rules! parse_quote_spanned_use {
+    ($span:expr => $($tokens:tt)*) => {
+        $crate::__private::quote_use_impl!{($crate::__private::syn::parse_quote_spanned) ($span =>) ($($tokens)*)}
+    };
+}
+
+#[macro_export]
+macro_rules! quote_use_no_prelude {
+    ($($tokens:tt)*) => {
+        $crate::__private::quote_use_impl!{($crate::__private::quote::quote) () (#use no_prelude; $($tokens)*)}
+    };
+}
+
+#[macro_export]
+macro_rules! quote_spanned_use_no_prelude {
+    ($span:expr => $($tokens:tt)*) => {
+        $crate::__private::quote_use_impl!{($crate::__private::quote::quote_spanned) ($span =>) (#use no_prelude; $($tokens)*)}
+    };
+}
+
+#[cfg(feature = "syn")]
+#[macro_export]
+macro_rules! parse_quote_use_no_prelude {
+    ($($tokens:tt)*) => {
+        $crate::__private::quote_use_impl!{($crate::__private::syn::parse_quote) () (#use no_prelude; $($tokens)*)}
+    };
+}
+
+#[cfg(feature = "syn")]
+#[macro_export]
+macro_rules! parse_quote_spanned_use_no_prelude {
+    ($span:expr => $($tokens:tt)*) => {
+        $crate::__private::quote_use_impl!{($crate::__private::syn::parse_quote_spanned) ($span =>) (#use no_prelude; $($tokens)*)}
+    };
+}

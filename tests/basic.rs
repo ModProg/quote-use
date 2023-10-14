@@ -1,5 +1,5 @@
 use quote::quote;
-use quote_use::quote_use;
+use quote_use::{quote_use, quote_use_no_prelude};
 
 #[test]
 fn r#use() {
@@ -29,7 +29,24 @@ fn r#use() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(feature = "prelude_core")]
+#[test]
+fn no_prelude() {
+    let quoted = quote! {
+        Some(10)
+    };
+
+    let quote_used = quote_use! {
+        # use no_prelude;
+        Some(10)
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+
+    let quote_used = quote_use_no_prelude! {
+        Some(10)
+    };
+    assert_eq!(quote_used.to_string(), quoted.to_string());
+}
+
 #[test]
 fn prelude_core() {
     let quoted = quote! {
@@ -42,7 +59,6 @@ fn prelude_core() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(feature = "prelude_2021")]
 #[test]
 fn prelude_2021() {
     let quoted = quote! {
@@ -55,7 +71,6 @@ fn prelude_2021() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(feature = "prelude_std")]
 #[test]
 fn prelude_std() {
     let quoted = quote! {
@@ -68,7 +83,6 @@ fn prelude_std() {
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }
 
-#[cfg(any(feature = "prelude_core", feature = "prelude_std"))]
 #[test]
 fn prelude_override() {
     let quoted = quote! {
@@ -221,46 +235,6 @@ fn var_in_path() {
 
         Name(10);
     };
-
-    assert_eq!(quote_used.to_string(), quoted.to_string());
-}
-
-#[cfg(feature = "namespace_idents")]
-#[test]
-fn namespace_idents() {
-    let var = "var";
-    let __quote_use_var = "quote_use_var";
-
-    let quoted = quote! {
-        __quote_use_ident;
-        $__quote_use_ident;
-        $::path;
-        ::__quote_use_path;
-        #__quote_use_var;
-        $#var;
-        '__quote_use_lifetime;
-    };
-    let quote_used = quote_use! {
-        $ident;
-        $$$ident;
-        $::path;
-        ::$path;
-        #$var;
-        $#var;
-        $'lifetime;
-    };
-    assert_eq!(quote_used.to_string(), quoted.to_string());
-}
-
-#[cfg(feature = "namespace_idents")]
-#[test]
-fn format_ident_namespaced() {
-    use quote::format_ident;
-    use quote_use::format_ident_namespaced;
-
-    let quoted = format_ident!("__quote_use_ident_{}", 2usize);
-
-    let quote_used = format_ident_namespaced!("$ident_{}", 2usize);
 
     assert_eq!(quote_used.to_string(), quoted.to_string());
 }

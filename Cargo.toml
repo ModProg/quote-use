@@ -1,8 +1,8 @@
 [package]
 categories = [
-    "rust-patterns",
-    "development-tools::procedural-macro-helpers",
-    "parsing",
+  "rust-patterns",
+  "development-tools::procedural-macro-helpers",
+  "parsing",
 ]
 description = "Support `use` in procmacros hygienically"
 documentation = "https://docs.rs/quote-use"
@@ -15,27 +15,17 @@ version = "0.7.2"
 edition = "2021"
 name = "quote-use"
 
-[lib]
-
 [dependencies]
+syn = { version = "2", default-features = false, features = ["parsing", "printing"], optional = true }
 quote = "1"
-syn = "2"
 quote-use-macros = { version = "0.7.2", path = "quote-use-macros" }
 
 [features]
-default = ["prelude_2021", "prelude_std"]
-prelude_core = ["quote-use-macros/prelude_core"]
-prelude_std = ["prelude_core", "quote-use-macros/prelude_std"]
-prelude_2021 = ["prelude_core", "quote-use-macros/prelude_2021"]
-namespace_idents = ["quote-use-macros/namespace_idents"]
 
 [dev-dependencies]
 pretty_assertions = "1"
 proc-macro2 = "1"
-syn = "2"
-
-[workspace]
-members = ["quote-use-macros"]
+syn = { version = "2", features = ["derive"] }
 
 [package.metadata.release]
 shared-version = true

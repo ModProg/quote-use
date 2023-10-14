@@ -1,7 +1,12 @@
 use proc_macro2::Span;
-use quote::{quote_spanned, ToTokens};
-use quote_use::{parse_quote_spanned_use, parse_quote_use, quote_spanned_use};
-use syn::{parse_quote, parse_quote_spanned, Expr};
+use quote::quote_spanned;
+use quote_use::quote_spanned_use;
+#[cfg(feature = "syn")]
+use {
+    quote::ToTokens,
+    quote_use::{parse_quote_spanned_use, parse_quote_use},
+    syn::{parse_quote, parse_quote_spanned, Expr},
+};
 
 #[test]
 fn quote_spanned() {
@@ -25,6 +30,7 @@ fn quote_spanned_empty() {
 }
 
 #[test]
+#[cfg(feature = "syn")]
 fn parse_quote_spanned() {
     let quoted: Expr = parse_quote_spanned! {Span::call_site()=>
         ::smth::ho::Name(10)
@@ -42,6 +48,7 @@ fn parse_quote_spanned() {
 }
 
 #[test]
+#[cfg(feature = "syn")]
 fn parse_quote() {
     let quoted: Expr = parse_quote! {
         ::smth::ho::Name(10)
