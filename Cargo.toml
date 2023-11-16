@@ -13,14 +13,14 @@ keywords = ["macro"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/ModProg/quote-use"
-version = "0.7.2"
+version = "0.8.0"
 edition = "2021"
 name = "quote-use"
 
 [dependencies]
 syn = { version = "2", default-features = false, features = ["parsing", "printing"], optional = true }
 quote = "1"
-quote-use-macros = { version = "0.7.2", path = "quote-use-macros" }
+quote-use-macros = { version = "0.8.0", path = "quote-use-macros" }
 
 [features]
 
