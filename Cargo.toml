@@ -1,3 +1,5 @@
+[workspace]
+
 [package]
 categories = [
   "rust-patterns",
