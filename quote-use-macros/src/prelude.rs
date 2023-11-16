@@ -5,12 +5,15 @@ use syn::Token;
 use crate::use_parser::UseItem;
 use crate::Use;
 
-pub(crate) fn prelude() -> impl Iterator<Item = Use> {
+pub(crate) fn prelude(std: bool) -> Box<dyn Iterator<Item = Use>> {
     let prelude = parse_prelude(include_str!("prelude/core.rs"));
-    let prelude = prelude.chain(parse_prelude(include_str!("prelude/std.rs")));
-    let prelude = prelude.chain(parse_prelude(include_str!("prelude/2021.rs")));
-
-    prelude
+    if std {
+        let prelude = prelude.chain(parse_prelude(include_str!("prelude/std.rs")));
+        let prelude = prelude.chain(parse_prelude(include_str!("prelude/2021.rs")));
+        Box::new(prelude)
+    } else {
+        Box::new(prelude)
+    }
 }
 
 fn parse_prelude(file: &str) -> impl Iterator<Item = Use> {

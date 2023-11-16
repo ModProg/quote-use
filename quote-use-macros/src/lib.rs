@@ -60,11 +60,25 @@ impl Parse for QuoteUse {
 impl ToTokens for QuoteUse {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Self(uses, tail) = self;
-        let mut uses = uses.to_vec();
-        if uses.first().is_some_and(|first| first.1 == "no_prelude") {
-            uses.remove(0);
-        } else {
-            uses.extend(prelude::prelude());
+        let mut prelude = true;
+        let mut std = true;
+        let mut uses: Vec<_> = uses
+            .iter()
+            .cloned()
+            .filter(|u| {
+                if u.1 == "no_prelude" {
+                    prelude = false;
+                    false
+                } else if u.1 == "no_std" {
+                    std = false;
+                    false
+                } else {
+                    true
+                }
+            })
+            .collect();
+        if prelude {
+            uses.extend(prelude::prelude(std));
         }
 
         tokens.extend(replace_in_group(&uses, tail.clone()));

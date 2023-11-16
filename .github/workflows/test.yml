@@ -14,10 +14,6 @@ jobs:
           - nightly
         features:
           - ""
-          - --no-default-features
-          - --no-default-features --features prelude_core,prelude_2021
-          - --no-default-features --features prelude_core
-          - --features namespace_idents
         include:
           - rust: nightly
             cargo_flags: -Z minimal-versions

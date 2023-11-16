@@ -53,16 +53,12 @@
 //! ```
 //! ### Different preludes
 //!
-//! By default [`quote_use!`] uses the [std prelude](std::prelude), [core
-//! prelude](core::prelude) and [2021 edition prelude](std::prelude::rust_2021),
-//! but this can be configured via features, and also completely disabled.
+//! By default [`quote_use!`] uses the [core prelude](core::prelude), [std
+//! prelude](std::prelude) and [2021 edition prelude](std::prelude::rust_2021).
+//! Prefering `core` where availible.
 //!
-//! - **`prelude_core`**: Enables [`core::prelude::v1`]
-//! - **`prelude_std`**: Enables [`std::prelude::v1`]  (Adds only those missing
-//!   in core and enables
-//! also `prelude_core`)
-//! - **`prelude_2021`**: Enables [`core::prelude::rust_2021`] (enables also
-//!   `prelude_core`)
+//! All preludes can be disabled by adding `# use no_prelude;` at the top of the
+//! macro input. The `std` prelude can be disabled with `# use no_std_prelude;`.
 //!
 //! ## Other quote macros
 //!

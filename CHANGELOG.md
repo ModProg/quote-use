@@ -7,11 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - having `#use no_prelude;` at the start of a quote_use invocation disables the prelude
+- having `#use no_std;` at the start of a quote_use invocation disables the std prelude
 - added `quote_use_no_prelude` variants for all `quote_use` macros
 
 ### Removed
-- removed `namespace_idents` feature, just use `__variable_name` instead
-- removed `prelude_*` features, by default all preludes are included now.
+- **Breaking Change** removed `namespace_idents` feature, just use `__variable_name` instead
+- **Breaking Change** removed `prelude_*` features, by default all preludes are included now.
 
 ## [0.7.2] - 2023-09-03
 ### Fixed
