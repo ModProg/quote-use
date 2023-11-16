@@ -24,7 +24,7 @@ quote-use-macros = { version = "0.7.2", path = "quote-use-macros" }
 
 [dev-dependencies]
 pretty_assertions = "1"
-proc-macro2 = "1"
+proc-macro2 = "1.0.60"
 syn = { version = "2", features = ["derive"] }
 
 [package.metadata.release]
