@@ -28,6 +28,7 @@ quote-use-macros = { version = "0.8.0", path = "quote-use-macros" }
 pretty_assertions = "1"
 proc-macro2 = "1.0.60"
 syn = { version = "2", features = ["derive"] }
+trybuild2 = "1.2.0"
 
 [package.metadata.release]
 shared-version = true

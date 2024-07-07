@@ -1,5 +1,7 @@
+use std::iter;
+
 use derive_where::derive_where;
-use proc_macro2::{Ident, TokenStream, TokenTree};
+use proc_macro2::{Ident, Punct, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
 use syn::ext::IdentExt;
 use syn::parse::{Parse, ParseStream};
@@ -113,61 +115,50 @@ fn parse_use_segment(
     inner: bool,
 ) -> Result<()> {
     let mut path = parent.clone();
-    let end = || {
-        Ok(if input.peek(Token![;]) {
-            if inner {
-                return Err(input.error("expected ident, `,`, `::` or `{`"));
-            } else {
-                true
-            }
-        } else {
-            input.is_empty()
-        })
-    };
     loop {
-        if end()? {
-            break;
-        } else if input.peek(Brace) {
-            // A group
-            let inner;
-            braced!(inner in input);
-            parse_use_segment(&path, &inner, output, true)?;
-            // A group can only be at the end of a path
-            if end()? {
-                break;
-            } else {
-                <Token![,]>::parse(input)?;
-                path = parent.clone();
-            }
-        } else {
+        let la = input.lookahead1();
+        if la.peek(Ident::peek_any) || la.peek(Token![#]) {
             path.push(input.parse()?);
-
-            if <Token![,]>::parse(input).is_ok() || end()? {
-                // Last path segment was target of use
-                if path.pop_self() {
-                    output.push(Use(path.clone(), path.get_ident()?.clone()));
-                } else {
-                    output.push(Use(path.clone(), path.pop_ident()?));
-                }
-                if !end()? {
-                    path = parent.clone();
-                }
-            } else if <Token![as]>::parse(input).is_ok() {
-                let was_self = path.pop_self();
-                // Last path segment was aliased
-                output.push(Use(path.clone(), input.parse()?));
-                if !was_self {
-                    path.pop();
-                }
-                if end()? {
+            let la = input.lookahead1();
+            if inner && (la.peek(Token![,]) || input.is_empty()) || !inner && la.peek(Token![;]) {
+                path.pop_self();
+                output.push(Use(path.clone(), path.get_ident()?.clone()));
+                break;
+            } else if la.peek(Token![as]) {
+                input.parse::<Token![as]>()?;
+                let alias: Ident = input.parse()?;
+                path.pop_self();
+                output.push(Use(path, alias));
+                break;
+            } else if la.peek(Token![::]) {
+                input.parse::<Token![::]>()?;
+                continue;
+            } else {
+                return Err(la.error());
+            }
+        } else if la.peek(Brace) {
+            // A group
+            let content;
+            braced!(content in input);
+            loop {
+                parse_use_segment(&path, &content, output, true)?;
+                if content.is_empty() {
                     break;
                 } else {
-                    <Token![,]>::parse(input)?;
-                    path = parent.clone();
+                    content.parse::<Token![,]>()?;
+                    if content.is_empty() {
+                        break;
+                    }
                 }
-            } else {
-                <Token![::]>::parse(input)?;
             }
+            let la = input.lookahead1();
+            if inner && (input.is_empty() || la.peek(Token![,])) || !inner && la.peek(Token![;]) {
+                break;
+            } else {
+                return Err(la.error());
+            }
+        } else {
+            return Err(la.error());
         }
     }
     Ok(())
