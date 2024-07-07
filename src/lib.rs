@@ -70,6 +70,9 @@
 //! - [`parse_quote_use!`] and [`parse_quote_spanned_use!`] for
 //!   [`parse_quote!`](syn::parse_quote!)
 //! and [`parse_quote_spanned!`](syn::parse_quote_spanned!)
+#[cfg(doc)]
+use quote::quote;
+
 #[doc(hidden)]
 pub mod __private {
     pub use quote;

@@ -30,6 +30,9 @@ proc-macro2 = "1.0.60"
 syn = { version = "2", features = ["derive"] }
 trybuild2 = "1.2.0"
 
+[package.metadata.docs.rs]
+all-features = true
+
 [package.metadata.release]
 shared-version = true
 
