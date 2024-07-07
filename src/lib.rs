@@ -29,7 +29,7 @@
 //!
 //! ## Prelude
 //!
-//! This also allows to use contents of the rust prelude directly:
+//! This also allows using contents of the rust prelude directly:
 //!
 //! ```
 //! # use quote_use::quote_use;
@@ -55,7 +55,7 @@
 //!
 //! By default [`quote_use!`] uses the [core prelude](core::prelude), [std
 //! prelude](std::prelude) and [2021 edition prelude](std::prelude::rust_2021).
-//! Prefering `core` where availible.
+//! Preferring `core` where available.
 //!
 //! All preludes can be disabled by adding `# use no_prelude;` at the top of the
 //! macro input. The `std` prelude can be disabled with `# use no_std_prelude;`.
@@ -72,6 +72,9 @@
 //! and [`parse_quote_spanned!`](syn::parse_quote_spanned!)
 #[cfg(doc)]
 use quote::quote;
+
+// Reexport as there is no need to change this macro
+pub use quote::format_ident;
 
 #[doc(hidden)]
 pub mod __private {
