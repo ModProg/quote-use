@@ -1,7 +1,5 @@
-use std::iter;
-
 use derive_where::derive_where;
-use proc_macro2::{Ident, Punct, TokenStream, TokenTree};
+use proc_macro2::{Ident, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
 use syn::ext::IdentExt;
 use syn::parse::{Parse, ParseStream};
@@ -66,16 +64,6 @@ impl Path {
 
     fn get_ident(&self) -> Result<&Ident> {
         match self.0.last().expect("path should contain a segment") {
-            IdentOrPounded::Ident(ident) => Ok(ident),
-            IdentOrPounded::Pounded(pound, _) => Err(Error::new_spanned(
-                pound,
-                "expected ident as last path segment",
-            )),
-        }
-    }
-
-    fn pop_ident(&mut self) -> Result<Ident> {
-        match self.0.pop().expect("path should contain a segment") {
             IdentOrPounded::Ident(ident) => Ok(ident),
             IdentOrPounded::Pounded(pound, _) => Err(Error::new_spanned(
                 pound,

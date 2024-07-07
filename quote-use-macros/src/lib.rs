@@ -64,7 +64,6 @@ impl ToTokens for QuoteUse {
         let mut std = true;
         let mut uses: Vec<_> = uses
             .iter()
-            .cloned()
             .filter(|u| {
                 if u.1 == "no_prelude" {
                     prelude = false;
@@ -76,6 +75,7 @@ impl ToTokens for QuoteUse {
                     true
                 }
             })
+            .cloned()
             .collect();
         if prelude {
             uses.extend(prelude::prelude(std));
