@@ -72,9 +72,8 @@
 //! and [`parse_quote_spanned!`](syn::parse_quote_spanned!)
 #[cfg(doc)]
 use quote::quote;
-
-// Reexport as there is no need to change this macro
-pub use quote::format_ident;
+// Reexport
+pub use quote::{format_ident, IdentFragment, ToTokens, TokenStreamExt};
 
 #[doc(hidden)]
 pub mod __private {
