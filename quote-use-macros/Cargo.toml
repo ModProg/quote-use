@@ -11,7 +11,7 @@ keywords = ["macro"]
 license = "MIT"
 readme = "../README.md"
 repository = "https://github.com/ModProg/quote-use"
-version = "0.8.3"
+version = "0.8.4"
 edition = "2021"
 name = "quote-use-macros"
 
