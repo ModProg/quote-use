@@ -1,4 +1,3 @@
-use derive_where::derive_where;
 use proc_macro2::{Ident, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
 use syn::ext::IdentExt;
@@ -6,11 +5,10 @@ use syn::parse::{Parse, ParseStream};
 use syn::token::Brace;
 use syn::{braced, Error, Result, Token};
 
-#[derive_where(Debug)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum IdentOrPounded {
     Ident(Ident),
-    Pounded(#[derive_where(skip)] Token![#], TokenTree),
+    Pounded(Token![#], TokenTree),
 }
 
 impl IdentOrPounded {

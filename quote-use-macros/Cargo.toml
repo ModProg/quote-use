@@ -19,11 +19,10 @@ name = "quote-use-macros"
 proc-macro = true
 
 [dependencies]
-derive-where = "1"
-proc-macro-utils = "0.8"
+proc-macro-utils = "0.10"
 proc-macro2 = "1"
 quote = "1"
-syn = { version = "2", features = ["parsing"], default-features = false}
+syn = { version = "2", features = ["parsing", "extra-traits", "clone-impls", "printing"], default-features = false}
 
 [dev-dependencies]
 pretty_assertions = "1.4"
